@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サイト公開（デプロイ）手順書</title>
+<style>
+  :root {
+    --navy: #1a2b4c;
+    --navy-light: #2c4370;
+    --accent: #2563eb;
+    --accent-bg: #eef3ff;
+    --warn-bg: #fff8e1;
+    --warn-border: #f5a524;
+    --gray-bg: #f4f5f7;
+    --gray-border: #c9ccd3;
+    --text: #222;
+    --text-sub: #555;
+    --border: #dfe2e8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "游ゴシック", Meiryo, sans-serif;
+    color: var(--text);
+    background: #ffffff;
+    line-height: 1.8;
+    font-size: 16px;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  header.hero {
+    background: var(--navy);
+    color: #fff;
+    padding: 40px 20px 32px;
+    margin-bottom: 30px;
+  }
+  header.hero .inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  header.hero h1 {
+    margin: 0 0 8px;
+    font-size: 1.8em;
+    letter-spacing: 0.02em;
+  }
+  header.hero p.subtitle {
+    margin: 0;
+    color: #b8c4e0;
+    font-size: 1em;
+  }
+
+  h2 {
+    color: var(--navy);
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px;
+    margin-top: 50px;
+    font-size: 1.4em;
+  }
+
+  h3 {
+    color: var(--navy-light);
+    font-size: 1.15em;
+    margin-top: 28px;
+  }
+
+  section {
+    scroll-margin-top: 16px;
+  }
+
+  /* イントロ情報カード */
+  .info-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .info-card {
+    flex: 1 1 220px;
+    background: var(--accent-bg);
+    border: 1px solid #cddaf7;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .info-card .label {
+    font-size: 0.85em;
+    color: var(--navy-light);
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  /* 目次 */
+  nav.toc {
+    background: var(--gray-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    border-bottom: none;
+    font-size: 1.15em;
+  }
+  nav.toc ol {
+    margin: 0;
+    padding-left: 1.4em;
+  }
+  nav.toc li {
+    margin-bottom: 6px;
+  }
+  nav.toc a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  nav.toc a:hover {
+    text-decoration: underline;
+  }
+
+  /* ステップバッジ */
+  .step-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 50px;
+  }
+  .step-heading .badge {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    font-weight: bold;
+  }
+  .step-heading h2 {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .step-body {
+    border-left: 3px solid var(--border);
+    margin-left: 22px;
+    padding-left: 30px;
+    padding-bottom: 4px;
+  }
+
+  /* 画面キャプチャ プレースホルダー */
+  .screenshot-placeholder {
+    border: 2px dashed var(--gray-border);
+    background: var(--gray-bg);
+    border-radius: 8px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-sub);
+    margin: 18px 0;
+    font-size: 0.95em;
+    padding: 10px;
+  }
+
+  /* アラートボックス（重要な注意） */
+  .alert {
+    background: var(--warn-bg);
+    border-left: 6px solid var(--warn-border);
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin: 18px 0;
+  }
+  .alert .alert-title {
+    font-weight: bold;
+    color: #8a5a00;
+    margin-bottom: 6px;
+  }
+
+  /* 用語説明 */
+  dl.terms {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    background: #fafbfc;
+  }
+  dl.terms dt {
+    font-weight: bold;
+    color: var(--navy);
+    margin-top: 14px;
+  }
+  dl.terms dd {
+    margin: 4px 0 10px;
+    color: var(--text-sub);
+  }
+
+  /* 関係図 */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 26px 0;
+    padding: 24px 10px;
+    background: var(--gray-bg);
+    border-radius: 10px;
+  }
+  .flow-box {
+    background: #fff;
+    border: 2px solid var(--navy-light);
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 150px;
+  }
+  .flow-box .flow-title {
+    font-weight: bold;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .flow-box .flow-desc {
+    font-size: 0.85em;
+    color: var(--text-sub);
+  }
+  .flow-arrow {
+    font-size: 1.8em;
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  /* テーブル */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 18px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--navy);
+    color: #fff;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) td {
+    background: #f7f8fa;
+  }
+
+  ul, ol {
+    padding-left: 1.4em;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+
+  code {
+    background: #eef0f4;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.92em;
+    color: #a8281c;
+  }
+
+  .method-box {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    background: #fafbfc;
+  }
+  .method-box h4 {
+    margin-top: 0;
+    color: var(--navy);
+  }
+
+  footer.note {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-sub);
+    font-size: 0.85em;
+    text-align: center;
+  }
+
+  a.back-to-toc {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.85em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  @media print {
+    header.hero { background: #fff !important; color: var(--navy); border-bottom: 3px solid var(--navy); }
+    header.hero p.subtitle { color: var(--text-sub); }
+    .screenshot-placeholder { border-color: #999; }
+    a { color: var(--text); text-decoration: none; }
+  }
+
+  @media (max-width: 480px) {
+    header.hero { padding: 28px 16px 24px; }
+    header.hero h1 { font-size: 1.4em; }
+    .step-body { margin-left: 10px; padding-left: 16px; }
+    .step-heading .badge { width: 36px; height: 36px; font-size: 1.1em; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <h1>サイト公開（デプロイ）手順書</h1>
+    <p class="subtitle">GitHub × Cloudflare Pages｜新入社員向け</p>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- イントロ -->
+  <section id="intro">
+    <h2>はじめに</h2>
+    <p>この手順書は、あなたが作成したWebページ（HTMLファイル）を、インターネット上で誰でも見られる状態にする（＝公開する）ための手順をまとめたものです。最後まで進めると、自分専用の公開URLを手に入れることができます。</p>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="label">所要時間の目安</div>
+        <div>30〜60分</div>
+      </div>
+      <div class="info-card">
+        <div class="label">用意するもの</div>
+        <div>会社から割り当てられたメールアドレス／PCまたはスマホ／公開したいHTMLファイル</div>
+      </div>
+      <div class="info-card">
+        <div class="label">ゴール</div>
+        <div>〇〇.pages.dev という公開URLでサイトが表示される状態になること</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 前提知識 -->
+  <section id="basics">
+    <h2>前提知識（用語の説明）</h2>
+    <p>作業を始める前に、これから出てくる言葉の意味を確認しておきましょう。</p>
+
+    <dl class="terms">
+      <dt>GitHub（ギットハブ）</dt>
+      <dd>プログラムのファイルを保存・管理するインターネット上の倉庫のようなサービスです。</dd>
+
+      <dt>リポジトリ</dt>
+      <dd>GitHubの中に作る「1つのプロジェクト専用フォルダ」のことです。1つのサイトにつき、1つのリポジトリを用意します。</dd>
+
+      <dt>Cloudflare Pages（クラウドフレア ページズ）</dt>
+      <dd>GitHubに置いたファイルを読み取り、実際に見られるWebサイトとして公開してくれるサービスです。</dd>
+
+      <dt>デプロイ</dt>
+      <dd>作ったファイルを本番環境（インターネット上の、誰でもアクセスできる場所）に反映する作業のことです。</dd>
+    </dl>
+
+    <h3>全体の流れ（イメージ図）</h3>
+    <div class="flow-diagram">
+      <div class="flow-box">
+        <div class="flow-title">あなたのPC</div>
+        <div class="flow-desc">HTMLファイルを作成</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-title">GitHub</div>
+        <div class="flow-desc">ファイルの保管庫</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-title">Cloudflare</div>
+        <div class="flow-desc">公開する場所</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-title">公開サイト</div>
+        <div class="flow-desc">誰でも閲覧可能</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 目次 -->
+  <nav class="toc" aria-label="目次">
+    <h2>目次</h2>
+    <ol>
+      <li><a href="#step1">STEP1：GitHubアカウントを作る</a></li>
+      <li><a href="#step2">STEP2：リポジトリを作る</a></li>
+      <li><a href="#step3">STEP3：HTMLファイルをアップロードする</a></li>
+      <li><a href="#step4">STEP4：Cloudflareアカウントを作る</a></li>
+      <li><a href="#step5">STEP5：Cloudflare Pagesでデプロイする</a></li>
+      <li><a href="#step6">STEP6：公開を確認する</a></li>
+      <li><a href="#update">公開後：内容を修正したいとき</a></li>
+      <li><a href="#trouble">よくあるトラブル</a></li>
+      <li><a href="#scope">補足：公開範囲について</a></li>
+    </ol>
+  </nav>
+
+  <!-- STEP1 -->
+  <section id="step1">
+    <div class="step-heading">
+      <div class="badge">1</div>
+      <h2>GitHubアカウントを作る</h2>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li><code>github.com</code> にアクセスし、右上（またはトップページ）の「Sign up」をクリックします。</li>
+        <li>会社から割り当てられたメールアドレスを入力します。</li>
+        <li>案内に従ってパスワード、ユーザー名を設定します。</li>
+        <li>登録したメールアドレスに届く認証メールを開き、メール認証を完了します。</li>
+      </ol>
+
+      <div class="screenshot-placeholder">
+        【ここに画面キャプチャを差し込む】<br>（GitHub Sign up画面）
+      </div>
+      <!-- 画像差し替え: <img src="images/step1-1.png" alt="GitHub Sign up画面"> に置き換える -->
+
+      <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+    </div>
+  </section>
+
+  <!-- STEP2 -->
+  <section id="step2">
+    <div class="step-heading">
+      <div class="badge">2</div>
+      <h2>リポジトリを作る</h2>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>画面右上の「＋」アイコンをクリックし、「New repository」を選びます。</li>
+        <li>以下の項目を入力・確認します。</li>
+      </ol>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>項目</th><th>説明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Owner</td><td>リポジトリの持ち主（自分のアカウント）。基本はそのままでOK。</td></tr>
+            <tr><td>Repository name</td><td>この箱の名前。URLの一部になる（例：<code>note-schedule</code>）。</td></tr>
+            <tr><td>Description</td><td>説明文。空欄でOK。</td></tr>
+            <tr><td>Choose visibility</td><td>Public＝誰でも閲覧可／Private＝自分だけ閲覧可。</td></tr>
+            <tr><td>Add README</td><td>説明書ファイル。今回はOffのまま。</td></tr>
+            <tr><td>Add .gitignore</td><td>アップロード除外設定。今回は不要。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ol start="3">
+        <li>入力が終わったら「Create repository」をクリックします。</li>
+      </ol>
+
+      <div class="screenshot-placeholder">
+        【ここに画面キャプチャを差し込む】<br>（New repository作成画面）
+      </div>
+      <!-- 画像差し替え: <img src="images/step2-1.png" alt="New repository作成画面"> に置き換える -->
+
+      <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+    </div>
+  </section>
+
+  <!-- STEP3 -->
+  <section id="step3">
+    <div class="step-heading">
+      <div class="badge">3</div>
+      <h2>HTMLファイルをアップロードする</h2>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>作成したリポジトリの画面にある「uploading an existing file」というリンクをクリックします。</li>
+        <li>公開したいファイルを選択し、「Commit changes」をクリックします。</li>
+      </ol>
+
+      <div class="alert">
+        <div class="alert-title">重要な注意</div>
+        ファイル名は必ず <code>index.html</code>（すべて小文字）にしてください。これ以外の名前だと、サイトを開いたときに「404 NOT_FOUND」エラーになります（トップページとして認識されないため）。
+      </div>
+
+      <div class="screenshot-placeholder">
+        【ここに画面キャプチャを差し込む】<br>（ファイルアップロード画面）
+      </div>
+      <!-- 画像差し替え: <img src="images/step3-1.png" alt="ファイルアップロード画面"> に置き換える -->
+
+      <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+    </div>
+  </section>
+
+  <!-- STEP4 -->
+  <section id="step4">
+    <div class="step-heading">
+      <div class="badge">4</div>
+      <h2>Cloudflareアカウントを作る</h2>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li><code>dash.cloudflare.com</code> にアクセスし、「Sign up」をクリックします。</li>
+        <li>会社から割り当てられたメールアドレスとパスワードを設定します。</li>
+        <li>登録したメールアドレスに届く認証メールを開き、メール認証を完了します。</li>
+      </ol>
+
+      <div class="screenshot-placeholder">
+        【ここに画面キャプチャを差し込む】<br>（Cloudflare Sign up画面）
+      </div>
+      <!-- 画像差し替え: <img src="images/step4-1.png" alt="Cloudflare Sign up画面"> に置き換える -->
+
+      <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+    </div>
+  </section>
+
+  <!-- STEP5 -->
+  <section id="step5">
+    <div class="step-heading">
+      <div class="badge">5</div>
+      <h2>Cloudflare Pagesでデプロイする</h2>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>左メニューの「Compute」→「Workers & Pages」を開きます。</li>
+        <li>「Create application」をクリックします。</li>
+      </ol>
+
+      <div class="alert">
+        <div class="alert-title">重要な注意</div>
+        表示された選択肢からそのまま進むと、Workers（プログラム実行用）の設定画面になってしまい、静的なHTMLサイトの公開ではエラーになります。画面下部にある「<strong>Looking to deploy Pages? Get started</strong>」から進んでください。
+      </div>
+
+      <ol start="3">
+        <li>GitHubとの連携を求められたら「Authorize（許可）」します。</li>
+        <li>先ほど作成したリポジトリを選択し、「Deploy」をクリックします。</li>
+        <li>数十秒待つとデプロイが完了し、<code>〇〇.pages.dev</code> という形式の公開URLが発行されます。</li>
+      </ol>
+
+      <div class="screenshot-placeholder">
+        【ここに画面キャプチャを差し込む】<br>（Cloudflare Pagesデプロイ画面）
+      </div>
+      <!-- 画像差し替え: <img src="images/step5-1.png" alt="Cloudflare Pagesデプロイ画面"> に置き換える -->
+
+      <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+    </div>
+  </section>
+
+  <!-- STEP6 -->
+  <section id="step6">
+    <div class="step-heading">
+      <div class="badge">6</div>
+      <h2>公開を確認する</h2>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>発行された <code>〇〇.pages.dev</code> のURLにアクセスします。</li>
+        <li>作成したページが正しく表示されるか確認します。</li>
+        <li>表示されない場合は、下にある「<a href="#trouble">よくあるトラブル</a>」を確認してください。</li>
+      </ol>
+
+      <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+    </div>
+  </section>
+
+  <!-- 公開後の修正 -->
+  <section id="update">
+    <h2>公開後：内容を修正したいとき</h2>
+    <p>一度公開したサイトも、あとから内容を修正できます。修正の規模に応じて、次の2つの方法から選びましょう。</p>
+
+    <div class="method-box">
+      <h4>方法1：GitHub上で直接編集（簡易修正向け）</h4>
+      <ol>
+        <li>リポジトリ内の <code>index.html</code> を開きます。</li>
+        <li>鉛筆アイコン（編集ボタン）をクリックします。</li>
+        <li>内容を編集し、「Commit changes」をクリックします。</li>
+      </ol>
+    </div>
+
+    <div class="method-box">
+      <h4>方法2：PCのClaude Codeで編集（本格的な修正向け）</h4>
+      <ol>
+        <li><code>git clone</code> でリポジトリを手元のPCにコピーします。</li>
+        <li>Claude Codeを使って編集を指示します。</li>
+        <li>編集が完了したらGitHubへ push します。</li>
+      </ol>
+    </div>
+
+    <p>どちらの方法でも、GitHubへ反映されるとCloudflareが自動的に検知し、数十秒で公開サイトにも反映されます。</p>
+
+    <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+  </section>
+
+  <!-- トラブル -->
+  <section id="trouble">
+    <h2>よくあるトラブル</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>症状</th><th>原因・対処</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>404 NOT_FOUND が表示される</td>
+            <td>ファイル名が <code>index.html</code> になっていません。GitHubでファイル名を変更してください。</td>
+          </tr>
+          <tr>
+            <td>Too many requests と表示される</td>
+            <td>GitHubのアクセス制限です。数分〜1時間待てば復旧します。</td>
+          </tr>
+          <tr>
+            <td>リポジトリ一覧が表示されない</td>
+            <td>GitHub連携が未完了です。連携許可（Authorize）をやり直してください。</td>
+          </tr>
+          <tr>
+            <td>Workers用の設定画面（<code>npx wrangler deploy</code>）が出た</td>
+            <td>Pagesではありません。前の画面に戻り「Looking to deploy Pages?」から進んでください。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+  </section>
+
+  <!-- 補足 -->
+  <section id="scope">
+    <h2>補足：公開範囲について</h2>
+    <p>この手順で作成したサイトは、URLを知っていれば誰でも閲覧できる状態になります。</p>
+    <p>社内限定にしたい場合は、Cloudflare Access（Zero Trust）等の設定が別途必要です。詳細は管理者に相談してください。</p>
+
+    <a class="back-to-toc" href="#intro">↑ 目次に戻る</a>
+  </section>
+
+  <footer class="note">
+    株式会社ヒカリ｜サイト公開（デプロイ）手順書
+  </footer>
+
+</div>
+
+</body>
+</html>
