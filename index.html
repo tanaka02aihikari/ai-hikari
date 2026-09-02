@@ -204,15 +204,14 @@
     color: var(--text-sub);
   }
 
-  /* 関係図 */
+  /* 関係図（上から下に進む縦型フロー） */
   .flow-diagram {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 14px;
-    flex-wrap: wrap;
+    gap: 0;
     margin: 26px 0;
-    padding: 24px 10px;
+    padding: 28px 10px;
     background: var(--gray-bg);
     border-radius: 10px;
   }
@@ -222,7 +221,8 @@
     border-radius: 8px;
     padding: 16px 20px;
     text-align: center;
-    min-width: 150px;
+    width: 100%;
+    max-width: 320px;
   }
   .flow-box .flow-title {
     font-weight: bold;
@@ -235,8 +235,10 @@
   }
   .flow-arrow {
     font-size: 1.8em;
+    line-height: 1;
     color: var(--accent);
     font-weight: bold;
+    padding: 4px 0;
   }
 
   /* テーブル */
@@ -323,7 +325,6 @@
     header.hero h1 { font-size: 1.4em; }
     .step-body { margin-left: 10px; padding-left: 16px; }
     .step-heading .badge { width: 36px; height: 36px; font-size: 1.1em; }
-    .flow-arrow { transform: rotate(90deg); }
   }
 </style>
 </head>
@@ -384,17 +385,17 @@
         <div class="flow-title">あなたのPC</div>
         <div class="flow-desc">HTMLファイルを作成</div>
       </div>
-      <div class="flow-arrow">→</div>
+      <div class="flow-arrow">↓</div>
       <div class="flow-box">
         <div class="flow-title">GitHub</div>
         <div class="flow-desc">ファイルの保管庫</div>
       </div>
-      <div class="flow-arrow">→</div>
+      <div class="flow-arrow">↓</div>
       <div class="flow-box">
         <div class="flow-title">Cloudflare</div>
         <div class="flow-desc">公開する場所</div>
       </div>
-      <div class="flow-arrow">→</div>
+      <div class="flow-arrow">↓</div>
       <div class="flow-box">
         <div class="flow-title">公開サイト</div>
         <div class="flow-desc">誰でも閲覧可能</div>
